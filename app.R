@@ -386,7 +386,7 @@ server <- function(input, output, session) {
     #update after delete is clicked
     input$delete
     loadData()
-  }, server = FALSE, selection = "single", options = list(order = list(2, 'asc'))
+  }, server = FALSE, selection = "single", options = list(order = list(2, 'desc'))
   #colnames = unname(GetTableMetadata()$fields)[-1]
   )     
   
