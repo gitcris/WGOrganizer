@@ -198,7 +198,8 @@ ui = shinyUI(dashboardPage(
                                                           )
           ),
           
-          checkboxInput("check", label = "Optionen aktiviert", FALSE),
+          # Implement later or just delete
+          #checkboxInput("check", label = "Optionen aktiviert", FALSE),
           
           conditionalPanel(
             condition = "input.name != 'Bitte waehlen'",
@@ -235,7 +236,8 @@ ui = shinyUI(dashboardPage(
           conditionalPanel(
             condition = "input.name != 'Bitte waehlen' && input.in_out != 'Bitte waehlen' && input.in_out != 'Bitte waehlen' && input.category != 'Bitte waehlen' && input.billdate != 0 && input.value != 0",
             textInput("comment", "Kommentar", NULL),
-            checkboxInput("done", "Beglichen", FALSE),
+            # Implement later... for making "Beglichen" immediately
+            #checkboxInput("done", "Beglichen", FALSE),
             helpText("Nach der Eingabe einfach auf",
                      "den Abschicken-Knopf druecken."),
             actionButton("submit", "Abschicken", icon = icon("send"))
@@ -296,9 +298,17 @@ ui = shinyUI(dashboardPage(
 server <- function(input, output, session) {
   
   # Update selectInput "category" after choosing selectInput "in_out"
+  # Implement later the "Optionen" for in and outs that are not often used like Wasser, Strom ...
+  # observeEvent(input$in_out, {
+  #   if (input$in_out == "Ausgabe" && input$check == TRUE) {updateSelectInput(session, "category", choices = c("Bitte waehlen", "Essen", "Fahrtkosten", "Party", "Strom", "Holz", "Gas", "Wasser", "Telefon"))}
+  #   else if (input$in_out == "Ausgabe" && input$check == FALSE) {
+  #     updateSelectInput(session, "category", choices = c("Bitte waehlen", "Essen", "Fahrtkosten", "Party"))
+  #   } else {updateSelectInput(session, "category", choices = c("Bitte waehlen", "Party", "Spende", "Miete"))}
+  # })
+  
+  # Update selectInput "category" after choosing selectInput "in_out"
   observeEvent(input$in_out, {
-    if (input$in_out == "Ausgabe" && input$check == TRUE) {updateSelectInput(session, "category", choices = c("Bitte waehlen", "Essen", "Fahrtkosten", "Party", "Strom", "Holz", "Gas", "Wasser", "Telefon"))}
-    else if (input$in_out == "Ausgabe" && input$check == FALSE) {
+    if (input$in_out == "Ausgabe"){
       updateSelectInput(session, "category", choices = c("Bitte waehlen", "Essen", "Fahrtkosten", "Party"))
     } else {updateSelectInput(session, "category", choices = c("Bitte waehlen", "Party", "Spende", "Miete"))}
   })
@@ -328,7 +338,9 @@ server <- function(input, output, session) {
         format(input$billdate, "%Y.%m.%d"),
         as.numeric(input$value),
         input$comment,
-        input$done
+        # Populate the done input with default FALSE
+        #input$done
+        FALSE
       )
     # print input values for debugging...
     #print(newdata)
@@ -374,7 +386,7 @@ server <- function(input, output, session) {
     #update after delete is clicked
     input$delete
     loadData()
-  }, server = FALSE, selection = "single"
+  }, server = FALSE, selection = "single", options = list(order = list(2, 'desc'))
   #colnames = unname(GetTableMetadata()$fields)[-1]
   )     
   
