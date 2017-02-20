@@ -48,18 +48,28 @@ generateRandomData <- function(number) {
 }
 
 # Function for saving the data in sqlite database
-saveData <- function(data) {
+saveData <- function(data, type="insert") {
   # Connect to the database
   db <- dbConnect(SQLite(), sqlitePath)
+  
   # Construct the update query by looping over the data fields
-  query <- sprintf(
-    "INSERT INTO %s (Datum, Bewohner, EinAus, Kategorie, billdate, Wert, Kommentar, Beglichen) VALUES ('%s')",
-    sqlitetable,
-    #paste(names(data), collapse = "', '")
-    paste(data, collapse = "', '")
-    #     paste(names(data), collapse = ", "),
-    #     paste(data, collapse = "', '")
-  )
+  # condition "insert" saving into database
+  # condition 2 delete row from database
+  if(type=="insert"){
+    query <- sprintf(
+      "INSERT INTO %s (Datum, Bewohner, EinAus, Kategorie, billdate, Wert, Kommentar, Beglichen) VALUES ('%s')",
+      sqlitetable,
+      #paste(names(data), collapse = "', '")
+      paste(data, collapse = "', '")
+      #     paste(names(data), collapse = ", "),
+      #     paste(data, collapse = "', '")
+    )
+  } else { # condition for deleting a row from database, 
+    query <- sprintf(
+      "DELETE FROM in_out WHERE lfdNr = %i", data
+    )
+  }
+  
   # Submit the update query and disconnect
   dbGetQuery(db, query)
   dbDisconnect(db)
@@ -156,7 +166,7 @@ EmptyInputs <- function(session) {
   updateSelectInput(session, inputId = "name", selected = "Bitte waehlen")
   updateSelectInput(session, inputId = "in_out", selected = "Bitte waehlen")
   updateSelectInput(session, inputId = "category", selected = "Bitte waehlen")
-  updateDateInput(session, inputId = "billdate", value = 0)
+  updateDateInput(session, inputId = "billdate", value = NULL)
   updateNumericInput(session, inputId = "value", value = 0)
   updateTextInput(session, inputId = "comment", value = "")
 }
@@ -347,7 +357,7 @@ server <- function(input, output, session) {
     saveData(newdata)
     
     # Deactivated emptying the input fields for debugging...
-    #EmptyInputs(session)
+    EmptyInputs(session)
   })
   
   # Click "Submit" button -> save data
@@ -367,6 +377,16 @@ server <- function(input, output, session) {
   #   DeleteData(formData())
   #   # Updates the editing fields below datatable
   #   UpdateInputs(CreateDefaultRecord(), session)
+  # }, priority = 1)
+  
+  #Press "delete row" button
+  # observeEvent(input$delete, {
+  #   # Get the right ID selected row because selected row must not equal the ID in database
+  #   data <- ReadData()[input$responses_rows_selected, ]
+  #   print(data["ldfNr"])
+  #   saveData(data["lfdNr"], type = "delete")
+  #   # Updates the editing fields below datatable
+  #   #UpdateInputs(CreateDefaultRecord(), session)
   # }, priority = 1)
 
   #Select row in table -> show details in inputs
