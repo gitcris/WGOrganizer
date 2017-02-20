@@ -148,8 +148,8 @@ CastData <- function(data) {
 # these are seperate fields for editing below the data table
 UpdateInputs <- function(data, session) {
   updateTextInput(session, inputId = "id_tab", value = unname(rownames(data)))
-  updateTextInput(session, inputId = "name_tab", value = unname(data["name"]))
-  updateCheckboxInput(session, inputId = "done_tab", value = as.logical(data["done"]))
+  updateTextInput(session, inputId = "name_tab", value = unname(data["Bewohner"]))
+  updateCheckboxInput(session, inputId = "done_tab", value = as.logical(data["Beglichen"]))
 }
 
 EmptyInputs <- function(session) {
@@ -277,12 +277,12 @@ ui = shinyUI(dashboardPage(
         # Create a new row for the table.
         fluidRow(DT::dataTableOutput("responses")),
 
-        box(title = "Daten bearbeiten", status = "primary", solidHeader = T, collapsible = T, collapsed = T,
-          fluidRow(actionButton("delete", "Zeile löschen"),
+        box(title = "Begleichen", status = "primary", solidHeader = T, collapsible = T, collapsed = T,
+          fluidRow(#actionButton("delete", "Zeile löschen"), # Implement the delete feature later maybe in an extra box
                   shinyjs::disabled(textInput(inputId = "id_tab", "ID", "")),
                   shinyjs::disabled(textInput(inputId = "name_tab", "Name", "")),
-                  checkboxInput(inputId = "done_tab", "Beglichen", FALSE),
-                  actionButton("submit", "Abschicken", icon = icon("send"))
+                  checkboxInput(inputId = "done_tab", "Beglichen", FALSE)
+                  #actionButton("submit", "Abschicken", icon = icon("send")) # Was for submitting the change in checkbox input... maybe possible submitting while clicking the checkbox
                    )
           )
         ),
@@ -369,15 +369,15 @@ server <- function(input, output, session) {
   #   UpdateInputs(CreateDefaultRecord(), session)
   # }, priority = 1)
 
-  # Select row in table -> show details in inputs
-  # observeEvent(input$responses_rows_selected, {
-  #   if (length(input$responses_rows_selected) > 0) {
-  #     # maybe here it is not necessary to read in the data from CSV maybe driectly from responses RAM...
-  #     data <- ReadData()[input$responses_rows_selected, ]
-  #     # Updates the editing fields below datatable
-  #     UpdateInputs(data, session)
-  #   }
-  # })
+  #Select row in table -> show details in inputs
+  observeEvent(input$responses_rows_selected, {
+    if (length(input$responses_rows_selected) > 0) {
+      # maybe here it is not necessary to read in the data from CSV maybe driectly from responses RAM...
+      data <- ReadData()[input$responses_rows_selected, ]
+      # Updates the editing fields below datatable
+      UpdateInputs(data, session)
+    }
+  })
   
   # display table
   output$responses <- DT::renderDataTable({
