@@ -64,9 +64,13 @@ saveData <- function(data, type="insert") {
       #     paste(names(data), collapse = ", "),
       #     paste(data, collapse = "', '")
     )
-  } else { # condition for deleting a row from database, 
+  } else if(type=="delete") { # condition for deleting a row from database, 
     query <- sprintf(
       "DELETE FROM in_out WHERE lfdNr = %i", data
+    )
+  } else if(type=="update") {
+    query <- sprintf(
+      "UPDATE in_out SET Beglichen = 'True' WHERE lfdNr = 4"
     )
   }
   
@@ -157,8 +161,10 @@ CastData <- function(data) {
 # Fill input fields with the values of the selected record in the table
 # these are seperate fields for editing below the data table
 UpdateInputs <- function(data, session) {
-  updateTextInput(session, inputId = "id_tab", value = unname(rownames(data)))
+  updateTextInput(session, inputId = "id_tab", value = unname(data["lfdNr"]))
   updateTextInput(session, inputId = "name_tab", value = unname(data["Bewohner"]))
+  updateTextInput(session, inputId = "category_tab", value = unname(data["Kategorie"]))
+  updateTextInput(session, inputId = "value_tab", value = unname(data["Wert"]))
   updateCheckboxInput(session, inputId = "done_tab", value = as.logical(data["Beglichen"]))
 }
 
@@ -289,10 +295,12 @@ ui = shinyUI(dashboardPage(
 
         box(title = "Begleichen", status = "primary", solidHeader = T, collapsible = T, collapsed = T,
           fluidRow(#actionButton("delete", "Zeile löschen"), # Implement the delete feature later maybe in an extra box
-                  shinyjs::disabled(textInput(inputId = "id_tab", "ID", "")),
+                  shinyjs::disabled(textInput(inputId = "id_tab", "lfdNr", "")),
                   shinyjs::disabled(textInput(inputId = "name_tab", "Name", "")),
-                  checkboxInput(inputId = "done_tab", "Beglichen", FALSE)
-                  #actionButton("submit", "Abschicken", icon = icon("send")) # Was for submitting the change in checkbox input... maybe possible submitting while clicking the checkbox
+                  shinyjs::disabled(textInput(inputId = "category_tab", "Kategory", "")),
+                  shinyjs::disabled(textInput(inputId = "value_tab", "Wert", "")),
+                  checkboxInput(inputId = "done_tab", "Beglichen", FALSE),
+                  actionButton("update", "Änderung übernehmen", icon = icon("send")) # Was for submitting the change in checkbox input... maybe possible submitting while clicking the checkbox
                    )
           )
         ),
@@ -360,24 +368,7 @@ server <- function(input, output, session) {
     EmptyInputs(session)
   })
   
-  # Click "Submit" button -> save data
-  # observeEvent(input$BUTyes, {
-  #   toggleModal(session, "confirm")#, toggle = "close")
-  #   if (input$id != "0") {
-  #     UpdateData(formData())
-  #   } else {
-  #     CreateData(formData())
-  #     # Updates the editing fields below datatable
-  #     UpdateInputs(CreateDefaultRecord(), session)
-  #   }
-  # }, priority = 1)
 
-  # Press "Delete" button -> delete from data
-  # observeEvent(input$delete, {
-  #   DeleteData(formData())
-  #   # Updates the editing fields below datatable
-  #   UpdateInputs(CreateDefaultRecord(), session)
-  # }, priority = 1)
   
   #Press "delete row" button
   # observeEvent(input$delete, {
@@ -397,6 +388,10 @@ server <- function(input, output, session) {
       # Updates the editing fields below datatable
       UpdateInputs(data, session)
     }
+  })
+  
+  observeEvent(input$update, {
+    saveData(data, type="update")
   })
   
   # display table
