@@ -199,7 +199,7 @@ ui = shinyUI(dashboardPage(
       tabItem(
         tabName = "eingabe",
         fluidRow(
-          selectInput("name", label = "Name", choices = c(
+          selectizeInput("name", label = "Name", choices = c(
                                                           "Bitte waehlen",
                                                           "Christian Heymer",
                                                           "Janosch Hüttner",
@@ -327,7 +327,7 @@ server <- function(input, output, session) {
   # Update selectInput "category" after choosing selectInput "in_out"
   observeEvent(input$in_out, {
     if (input$in_out == "Ausgabe"){
-      updateSelectInput(session, "category", choices = c("Bitte waehlen", "Essen", "Fahrtkosten", "Party", "Überweisung Foodcoop", "Holz", "GEZ", "Strom", "Wasser", "Internet & Telefon", "Gas"))
+      updateSelectInput(session, "category", choices = c("Bitte waehlen", "Essen", "Verbrauchsmaterialien", "Fahrtkosten", "Party", "Baumaterialien", "Überweisung Foodcoop", "Brennholz", "GEZ", "Strom", "Wasser", "Internet & Telefon", "Gas"))
     } else {updateSelectInput(session, "category", choices = c("Bitte waehlen", "Party", "Spende", "Miete"))}
   })
   
