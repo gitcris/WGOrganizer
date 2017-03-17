@@ -327,7 +327,8 @@ server <- function(input, output, session) {
   # Update selectInput "category" after choosing selectInput "in_out"
   observeEvent(input$in_out, {
     if (input$in_out == "Ausgabe"){
-      updateSelectInput(session, "category", choices = c("Bitte waehlen", "Essen", "Verbrauchsmaterialien", "Fahrtkosten", "Party", "Baumaterialien", "Überweisung Foodcoop", "Brennholz", "GEZ", "Strom", "Wasser", "Internet & Telefon", "Gas"))
+      updateSelectInput(session, "category", choices = list(c("Bitte waehlen"), "Allgemein" = c("Essen", "Verbrauchsmaterialien", "Fahrtkosten"), "Verwaltung" = c("Party", "Baumaterialien", "Überweisung Foodcoop", "Brennholz", "GEZ", "Strom", "Wasser", "Internet & Telefon", "Gas")))
+      #updateSelectInput(session, "category", choices = c("Bitte waehlen", "Essen", "Verbrauchsmaterialien", "Fahrtkosten", "Party", "Baumaterialien", "Überweisung Foodcoop", "Brennholz", "GEZ", "Strom", "Wasser", "Internet & Telefon", "Gas"))
     } else {updateSelectInput(session, "category", choices = c("Bitte waehlen", "Party", "Spende", "Miete"))}
   })
   
