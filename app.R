@@ -70,8 +70,10 @@ saveData <- function(data, type="insert") {
     )
   } else if(type=="update") {
     query <- sprintf(
-      "UPDATE in_out SET Beglichen = 'True' WHERE lfdNr = 4"
+      "UPDATE in_out SET Beglichen = 'TRUE' WHERE lfdNr = %i", data
     )
+    # Just for debugging, prints the data, in that case the row that is selected
+    print(data)
   }
   
   # Submit the update query and disconnect
@@ -192,10 +194,10 @@ ui = shinyUI(dashboardPage(
     menuItem("Ausgabe", tabName = "ausgabe", icon = icon("line-chart"))
   )),
   
-  dashboardBody(  #use shiny js to disable the ID field
-    shinyjs::useShinyjs(),
+  dashboardBody(
+    shinyjs::useShinyjs(), #use shiny js to disable the ID field
     tabItems(
-      ############## Eingabe-Tab ##########################
+      ############## INPUT TAB ##########################
       tabItem(
         tabName = "eingabe",
         fluidRow(
@@ -213,9 +215,6 @@ ui = shinyUI(dashboardPage(
                                                           "Felix Lindicke"
                                                           )
           ),
-          
-          # Implement later or just delete
-          #checkboxInput("check", label = "Optionen aktiviert", FALSE),
           
           conditionalPanel(
             condition = "input.name != 'Bitte waehlen'",
@@ -276,7 +275,7 @@ ui = shinyUI(dashboardPage(
       
       
       
-      ############# Tabellen-Tab #############################
+      ############# TABLE TAB #############################
       tabItem(
         tabName = "tabelle",
         
@@ -381,18 +380,21 @@ server <- function(input, output, session) {
   #   #UpdateInputs(CreateDefaultRecord(), session)
   # }, priority = 1)
 
-  #Select row in table -> show details in inputs
+  #Select row in table -> show details in "Beglichen"-Inputs
   observeEvent(input$responses_rows_selected, {
     if (length(input$responses_rows_selected) > 0) {
       # maybe here it is not necessary to read in the data from CSV maybe driectly from responses RAM...
-      data <- ReadData()[input$responses_rows_selected, ]
+      data <- loadData()[input$responses_rows_selected, ]
       # Updates the editing fields below datatable
       UpdateInputs(data, session)
     }
   })
   
+  # Update the database based on the "Begleichen" dialog below the datatable
   observeEvent(input$update, {
-    saveData(data, type="update")
+    # Get the "lfdNr" of data
+    lfdNr = loadData()[input$responses_rows_selected, ][1,1]
+    saveData(data = lfdNr, type="update")
   })
   
   # display table
@@ -402,7 +404,7 @@ server <- function(input, output, session) {
     #update after delete is clicked
     input$delete
     loadData()
-  }, server = FALSE, selection = "single", options = list(order = list(2, 'desc'), pageLength = 50)
+  }, server = FALSE, selection = "single", options = list(order = list(1, 'desc'), pageLength = 50), rownames = FALSE
   #colnames = unname(GetTableMetadata()$fields)[-1]
   )     
   
