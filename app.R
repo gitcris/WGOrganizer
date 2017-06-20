@@ -403,8 +403,10 @@ server <- function(input, output, session) {
     input$submit
     #update after delete is clicked
     input$delete
-    loadData()
+    loadData() #%>%
+      #formatStyle("EinAus", target = "row", backgroundColor = styleEqual(c("Ausgabe", "Einnahme"), c('gray', 'yellow')))
   }, server = FALSE, selection = "single", options = list(order = list(1, 'desc'), pageLength = 50), rownames = FALSE
+  
   #colnames = unname(GetTableMetadata()$fields)[-1]
   )     
   
