@@ -47,7 +47,7 @@ generateRandomData <- function(number) {
   }
 }
 
-# Function for saving the data in sqlite database
+# Function for inserting, updating, deleting data in sqlite database
 saveData <- function(data, type="insert") {
   # Connect to the database
   db <- dbConnect(SQLite(), sqlitePath)
@@ -55,6 +55,7 @@ saveData <- function(data, type="insert") {
   # Construct the update query by looping over the data fields
   # condition "insert" saving into database
   # condition 2 delete row from database
+  # condition 3 update Beglichen
   if(type=="insert"){
     query <- sprintf(
       "INSERT INTO %s (Datum, Bewohner, EinAus, Kategorie, billdate, Wert, Kommentar, Beglichen) VALUES ('%s')",
@@ -96,68 +97,11 @@ loadData <- function() {
 # Load database at start for populating the selectInputs of user interface
 responses <- loadData()
 
-
-# Get table metadata. For now, just the fields
-# Further development: also define field types
-# and create inputs generically
-GetTableMetadata <- function() {
-  fields <- c(id = "Id",
-              date = "Datum",
-              name = "Name",
-              in_out = "Einnahme / Ausgabe",
-              category = "Kategorie",
-              billdate = "Miet- / Rechnungsdatum",
-              value = "Wert",
-              comment = "Kommentar",
-              done = "Beglichen")
-  
-  result <- list(fields = fields)
-  return (result)
-}
-
-#CREATE
-CreateData <- function(data) {
-  data <- CastData(data)
-  rownames(data) <- GetNextId()
-  if (exists("responses")) {
-    responses <<- rbind(responses, data)
-  } else {
-    responses <<- data
-  }
-}
-
 #READ
 ReadData <- function() {
   if (exists("responses")) {
     responses
   }
-}
-
-#UPDATE
-UpdateData <- function(data) {
-  data <- CastData(data)
-  responses[row.names(responses) == row.names(data), ] <<- data
-}
-
-#DELETE
-DeleteData <- function(data) {
-  responses <<- responses[row.names(responses) != unname(data["id"]), ]
-}
-
-# Cast from Inputs to a one-row data.frame
-CastData <- function(data) {
-  datar <- data.frame(date = data["date"],
-                      name = data["name"],
-                      in_out = data["in_out"],
-                      category = data["category"],
-                      billdate = data["billdate"],
-                      value = as.integer(data["value"]),
-                      comment = data["comment"],
-                      done = as.logical(data["done"]),
-                      stringsAsFactors = FALSE)
-  
-  rownames(datar) <- data["id"]
-  return (datar)
 }
 
 # Fill input fields with the values of the selected record in the table
@@ -181,7 +125,6 @@ EmptyInputs <- function(session) {
 
 ##########################################################################################################
 ############################ USER INTERFACE ##############################################################
-##########################################################################################################
 
 ui = shinyUI(dashboardPage(
   skin = "green",
@@ -210,7 +153,7 @@ ui = shinyUI(dashboardPage(
                                                           "Sophie Mailänder",
                                                           "Miriam Zeltner",
                                                           "Jakob Hehl",
-                                                          "Amir",
+                                                          "Elena Herrmann",
                                                           "Szofi",
                                                           "Felix Lindicke"
                                                           )
@@ -279,16 +222,6 @@ ui = shinyUI(dashboardPage(
       tabItem(
         tabName = "tabelle",
         
-        # Create a new Row in the UI for selectInputs
-        # fluidRow(
-        #   column(3,
-        #          dateRangeInput("daterange", "Datum")),
-        #   column(2,
-        #          selectInput("user", "Benutzer", c(
-        #            "Alles", unique(as.character(responses$Bewohner))
-        #          )))
-        #   ),
-        
         # Create a new row for the table.
         fluidRow(DT::dataTableOutput("responses")),
 
@@ -315,15 +248,6 @@ ui = shinyUI(dashboardPage(
 server <- function(input, output, session) {
   
   # Update selectInput "category" after choosing selectInput "in_out"
-  # Implement later the "Optionen" for in and outs that are not often used like Wasser, Strom ...
-  # observeEvent(input$in_out, {
-  #   if (input$in_out == "Ausgabe" && input$check == TRUE) {updateSelectInput(session, "category", choices = c("Bitte waehlen", "Essen", "Fahrtkosten", "Party", "Strom", "Holz", "Gas", "Wasser", "Telefon"))}
-  #   else if (input$in_out == "Ausgabe" && input$check == FALSE) {
-  #     updateSelectInput(session, "category", choices = c("Bitte waehlen", "Essen", "Fahrtkosten", "Party"))
-  #   } else {updateSelectInput(session, "category", choices = c("Bitte waehlen", "Party", "Spende", "Miete"))}
-  # })
-  
-  # Update selectInput "category" after choosing selectInput "in_out"
   observeEvent(input$in_out, {
     if (input$in_out == "Ausgabe"){
       updateSelectInput(session, "category", choices = list(c("Bitte waehlen"), "Allgemein" = c("Essen", "Verbrauchsmaterialien", "Fahrtkosten"), "Verwaltung" = c("Miete", "Rueckbaukonto", "Kontoführungsgebühr", "Party", "Baumaterialien", "Überweisung Foodcoop", "Brennholz", "GEZ", "Strom", "Wasser", "Internet & Telefon", "Gas")))
@@ -337,11 +261,6 @@ server <- function(input, output, session) {
       updateDateInput(session, "billdate", label = "Rechnungsdatum")
     }
   })
-  
-  # input fields are treated as a group
-  # formData <- reactive({
-  #   sapply(names(GetTableMetadata()$fields), function(x) input[[x]])
-  # })
   
   # Click submit button and confirm with Yes
   observeEvent(input$BUTyes, {
@@ -395,6 +314,8 @@ server <- function(input, output, session) {
     # Get the "lfdNr" of data
     lfdNr = loadData()[input$responses_rows_selected, ][1,1]
     saveData(data = lfdNr, type="update")
+    # update responses variable
+    responses <- loadData()
   })
   
   # display table
