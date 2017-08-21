@@ -355,7 +355,7 @@ server <- function(input, output, session) {
     # Create plot for "Essen" only
     responses <- loadData()
     responses$newdate <- cut(as.Date(responses[["billdate"]], "%Y.%m.%d"), breaks = "month")
-    ggplot(responses[responses$Kategorie == "Essen", ], aes(newdate, Wert, group = Kategorie, colour = Kategorie)) + stat_summary(fun.y = sum, geom = "bar") + xlab("Monat")# + scale_x_date(labels = date_format("%Y-%m"),breaks = "1 month")
+    ggplot(responses[responses$Kategorie == c("Essen", "Überweisung Foodcoop"), ], aes(newdate, Wert, group = Kategorie, colour = Kategorie, fill = Kategorie)) + stat_summary(fun.y = sum, geom = "bar") + geom_bar(stat="identity") + xlab("Monat")# + scale_x_date(labels = date_format("%Y-%m"),breaks = "1 month")
   })
   
 }
