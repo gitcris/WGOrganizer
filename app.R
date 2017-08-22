@@ -93,7 +93,6 @@ loadData <- function() {
 
 # Load database at start for populating the selectInputs of user interface
 responses <- loadData()
-print(responses)
 
 #READ
 ReadData <- function() {
@@ -133,7 +132,8 @@ ui = shinyUI(dashboardPage(
   dashboardSidebar(sidebarMenu(
     menuItem("Eingabe", tabName = "eingabe", icon = icon("edit")),
     menuItem("Tabelle", tabName = "tabelle", icon = icon("table")),
-    menuItem("Ausgabe", tabName = "ausgabe", icon = icon("line-chart"), badgeLabel = "new")
+    menuItem("Diagramme", tabName = "ausgabe", icon = icon("line-chart"), badgeLabel = "new"),
+    menuItem("Zählerstände", tabName = "zaehler", badgeLabel = "new")
   )),
   
   dashboardBody(
@@ -145,16 +145,16 @@ ui = shinyUI(dashboardPage(
         fluidRow(
           selectizeInput("name", label = "Name", choices = c(
                                                           "Bitte waehlen",
-                                                          "Christ1an Heym3r",
-                                                          "Jan0sch Hättner",
-                                                          "Chris Made1ra N0ronha",
-                                                          "Johannes R3iter",
-                                                          "Sophie Mai1änder",
-                                                          "Miriam Zeltn3r",
-                                                          "Jakob H3hl",
-                                                          "Elena H3rman",
-                                                          "Sz0fi",
-                                                          "Felix L1ndi(ke"
+                                                          "Christian Heymer",
+                                                          "Janosch Hüttner",
+                                                          "Chris Madeira Noronha",
+                                                          "Johannes Reiter",
+                                                          "Sophie Mailänder",
+                                                          "Miriam Zeltner",
+                                                          "Jakob Hehl",
+                                                          "Elena Herman",
+                                                          "Szofi",
+                                                          "Felix Lindicke"
                                                           )
           ),
           
@@ -226,7 +226,7 @@ ui = shinyUI(dashboardPage(
         
         # create a collapsed box above datatable view for editing the table
         box(title = "Änderungen in der Tabelle vornehmen", status = "primary", solidHeader = T, collapsible = T, collapsed = T,
-          fluidRow(#actionButton("delete", "Zeile löschen"), # Implement the delete feature later maybe in an extra box
+          fluidRow(
                   column(2,
                          shinyjs::disabled(textInput(inputId = "id_tab", "lfdNr", ""))
                   ),
@@ -250,9 +250,19 @@ ui = shinyUI(dashboardPage(
       tabItem(tabName = "ausgabe",
                 fluidRow(
                   h2("Essensausgabe pro Monat"),
-                  plotOutput("plot")
+                  plotOutput("plot"),
+                  h2("Gesamtausgaben"),
+                  plotOutput("plot2"),
+                  h2("Gesamteinnahmen"),
+                  plotOutput("plot3")
                 )
-              )
+              ),
+      
+      ################ ZÄHLERSTÄNDE TAB ############
+      tabItem(tabName = "zaehler",
+              fluidRow(
+                h2("Zählerstände")
+              ))
     ))
   ))
 
@@ -292,8 +302,6 @@ server <- function(input, output, session) {
         #input$done
         FALSE
       )
-    # print input values for debugging...
-    #print(newdata)
     saveData(newdata)
     
     # Deactivated emptying the input fields for debugging...
@@ -334,16 +342,12 @@ server <- function(input, output, session) {
   output$responses <- DT::renderDataTable({
     #update datatable view after submit button is clicked
     input$submit
-    #update datatable view after update button is clicked
     input$update
-    #update datatable view after delete button is clicked
     input$delete
     #loadData()
     datatable(loadData(), options = list(pageLength = 50, order = list(1, 'desc')), rownames = FALSE, selection = "single") %>%
-      # format whole row
-      #formatStyle("EinAus", target = "row", backgroundColor = styleEqual(c("Ausgabe", "Einnahme"), c('red', 'green')))
       formatStyle("EinAus", backgroundColor = styleEqual(c("Ausgabe", "Einnahme"), c('red', 'green')))
-  }#, server = FALSE, selection = "single", options = list(order = list(1, 'desc'), pageLength = 50), rownames = FALSE
+  }
   )     
   
   # Create Plot
@@ -352,10 +356,42 @@ server <- function(input, output, session) {
     input$submit
     input$delete
     input$update
-    # Create plot for "Essen" only
     responses <- loadData()
+    # Prepare Dates for only showning Month in Plot
     responses$newdate <- cut(as.Date(responses[["billdate"]], "%Y.%m.%d"), breaks = "month")
+    # Create plot for "Essen" only
     ggplot(responses[responses$Kategorie == c("Essen", "Überweisung Foodcoop"), ], aes(newdate, Wert, group = Kategorie, colour = Kategorie, fill = Kategorie)) + stat_summary(fun.y = sum, geom = "bar") + geom_bar(stat="identity") + xlab("Monat")# + scale_x_date(labels = date_format("%Y-%m"),breaks = "1 month")
+  })
+  
+  # Create Plot2
+  output$plot2 <- renderPlot({
+    # input that causes plot to renew (can be a button or else)
+    input$submit
+    input$delete
+    input$update
+    responses <- loadData()
+    # Prepare Dates for only showning Month in Plot
+    responses$newdate <- cut(as.Date(responses[["billdate"]], "%Y.%m.%d"), breaks = "month")
+    # Create plot for all Ausgaben
+    ggplot(responses[responses$EinAus == "Ausgabe", ], aes(newdate, Wert, group = Kategorie, colour = Kategorie, fill = Kategorie)) +
+      stat_summary(fun.y = sum, geom = "bar") +
+      geom_bar(stat="identity") +
+      xlab("Monat")
+  })
+  
+  # Create Plot3
+  output$plot3 <- renderPlot({
+    # input that causes plot to renew (can be a button or else)
+    input$submit
+    input$delete
+    input$update
+    responses <- loadData()
+    # Prepare Dates for only showning Month in Plot
+    responses$newdate <- cut(as.Date(responses[["billdate"]], "%Y.%m.%d"), breaks = "month")
+    # Create plot for all Einnahmen
+    ggplot(responses[responses$EinAus == "Einnahme", ], aes(newdate, Wert, group = Kategorie, colour = Kategorie, fill = Kategorie)) +
+      stat_summary(fun.y = sum, geom = "bar") +
+      geom_bar(stat="identity") + xlab("Monat")
   })
   
 }
