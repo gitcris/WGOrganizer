@@ -93,6 +93,7 @@ loadData <- function() {
 
 # Load database at start for populating the selectInputs of user interface
 responses <- loadData()
+print(responses)
 
 #READ
 ReadData <- function() {
@@ -153,7 +154,7 @@ ui = shinyUI(dashboardPage(
                                                           "Miriam Zeltner",
                                                           "Jakob Hehl",
                                                           "Elena Herman",
-                                                          "Szofi",
+                                                          "Zsofia Gyongyver Menich",
                                                           "Felix Lindicke"
                                                           )
           ),
@@ -391,7 +392,8 @@ server <- function(input, output, session) {
     # Create plot for all Einnahmen
     ggplot(responses[responses$EinAus == "Einnahme", ], aes(newdate, Wert, group = Kategorie, colour = Kategorie, fill = Kategorie)) +
       stat_summary(fun.y = sum, geom = "bar") +
-      geom_bar(stat="identity") + xlab("Monat")
+      geom_bar(stat="identity") +
+      xlab("Monat")
   })
   
 }
