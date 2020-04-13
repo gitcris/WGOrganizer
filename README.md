@@ -6,7 +6,7 @@ This Shiny R Server App helps you with organizing financial structure of a commu
 
 ## Table View
 Change data in table view.
-![](table_view.png)
+![](How_to_change_data.gif)
 
 ## Diagram
 ![](diagrams.png)
