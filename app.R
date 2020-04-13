@@ -128,7 +128,7 @@ EmptyInputs <- function(session) {
 ui = shinyUI(dashboardPage(
   skin = "green",
   
-  dashboardHeader(title = "Spinnerei Kollnau"),
+  dashboardHeader(title = "WG Name"),
   
   dashboardSidebar(sidebarMenu(
     menuItem("Eingabe", tabName = "eingabe", icon = icon("edit")),
@@ -146,16 +146,16 @@ ui = shinyUI(dashboardPage(
         fluidRow(
           selectizeInput("name", label = "Name", choices = c(
                                                           "Bitte waehlen",
-                                                          "Christian Heymer",
-                                                          "Janosch Hüttner",
-                                                          "Chris Madeira Noronha",
-                                                          "Johannes Reiter",
-                                                          "Sophie Mailänder",
-                                                          "Miriam Zeltner",
-                                                          "Jakob Hehl",
-                                                          "Elena Herman",
-                                                          "Zsofia Gyongyver Menich",
-                                                          "Felix Lindicke"
+                                                          "Name1",
+                                                          "Name2",
+                                                          "Name3",
+                                                          "Name4",
+                                                          "Name5",
+                                                          "Name6",
+                                                          "Name7",
+                                                          "Name8",
+                                                          "Name9",
+                                                          "Name10"
                                                           )
           ),
           
@@ -225,7 +225,7 @@ ui = shinyUI(dashboardPage(
         # Create a new row for the tableview
         fluidRow(DT::dataTableOutput("responses")),
         
-        # create a collapsed box above datatable view for editing the table
+        # create a collapsed box beneath datatable view for editing the table
         box(title = "Änderungen in der Tabelle vornehmen", status = "primary", solidHeader = T, collapsible = T, collapsed = T,
           fluidRow(
                   column(2,
