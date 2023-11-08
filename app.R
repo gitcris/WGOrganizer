@@ -102,6 +102,7 @@ ReadData <- function() {
   }
 }
 
+
 # Fill input fields with the values of the selected record in the table
 # option "Begleichen" under datatable view
 # these are seperate fields for editing the data
@@ -272,6 +273,23 @@ ui = shinyUI(dashboardPage(
 
 server <- function(input, output, session) {
   
+  createPlot <- function(category, responseType) {
+    renderPlot({
+      # input that causes plot to renew (can be a button or else)
+      input$submit
+      input$delete
+      input$update
+      responses <- loadData()
+      # Prepare Dates for only showning Month in Plot
+      responses$newdate <- cut(as.Date(responses[["billdate"]], "%Y.%m.%d"), breaks = "month")
+      # Create plot for all Einnahmen
+      ggplot(responses[responseType == category, ], aes(newdate, Wert, group = Kategorie, colour = Kategorie, fill = Kategorie)) +
+        stat_summary(fun.y = sum, geom = "bar") +
+        geom_bar(stat="identity") +
+        xlab("Monat")
+    })
+  }
+  
   # Update selectInput "category" after choosing selectInput "in_out"
   observeEvent(input$in_out, {
     if (input$in_out == "Ausgabe"){
@@ -351,50 +369,14 @@ server <- function(input, output, session) {
   }
   )     
   
-  # Create Plot
-  output$plot <- renderPlot({
-    # input that causes plot to renew (can be a button or else)
-    input$submit
-    input$delete
-    input$update
-    responses <- loadData()
-    # Prepare Dates for only showning Month in Plot
-    responses$newdate <- cut(as.Date(responses[["billdate"]], "%Y.%m.%d"), breaks = "month")
-    # Create plot for "Essen" only
-    ggplot(responses[responses$Kategorie == c("Essen", "Überweisung Foodcoop"), ], aes(newdate, Wert, group = Kategorie, colour = Kategorie, fill = Kategorie)) + stat_summary(fun.y = sum, geom = "bar") + geom_bar(stat="identity") + xlab("Monat")# + scale_x_date(labels = date_format("%Y-%m"),breaks = "1 month")
-  })
+  # Create Plot1
+  output$plot <- createPlot(category = c("Essen", "Überweisung Foodcoop"), responseType = responses$Kategorie)
   
   # Create Plot2
-  output$plot2 <- renderPlot({
-    # input that causes plot to renew (can be a button or else)
-    input$submit
-    input$delete
-    input$update
-    responses <- loadData()
-    # Prepare Dates for only showning Month in Plot
-    responses$newdate <- cut(as.Date(responses[["billdate"]], "%Y.%m.%d"), breaks = "month")
-    # Create plot for all Ausgaben
-    ggplot(responses[responses$EinAus == "Ausgabe", ], aes(newdate, Wert, group = Kategorie, colour = Kategorie, fill = Kategorie)) +
-      stat_summary(fun.y = sum, geom = "bar") +
-      geom_bar(stat="identity") +
-      xlab("Monat")
-  })
+  output$plot2 <- createPlot(category = c("Ausgabe"), responseType = responses$EinAus)
   
   # Create Plot3
-  output$plot3 <- renderPlot({
-    # input that causes plot to renew (can be a button or else)
-    input$submit
-    input$delete
-    input$update
-    responses <- loadData()
-    # Prepare Dates for only showning Month in Plot
-    responses$newdate <- cut(as.Date(responses[["billdate"]], "%Y.%m.%d"), breaks = "month")
-    # Create plot for all Einnahmen
-    ggplot(responses[responses$EinAus == "Einnahme", ], aes(newdate, Wert, group = Kategorie, colour = Kategorie, fill = Kategorie)) +
-      stat_summary(fun.y = sum, geom = "bar") +
-      geom_bar(stat="identity") +
-      xlab("Monat")
-  })
+  output$plot3 <- createPlot(category = c("Einnahme"), responseType = responses$EinAus)
   
 }
 
