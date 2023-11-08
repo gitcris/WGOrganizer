@@ -199,7 +199,7 @@ ui = shinyUI(dashboardPage(
             #checkboxInput("done", "Beglichen", FALSE),
             helpText("Nach der Eingabe einfach auf",
                      "den Abschicken-Knopf druecken."),
-            actionButton("submit", "Abschicken", icon = icon("send"))
+            actionButton("submit", "Abschicken", icon = icon("paper-plane"))
           ),
 
         # dialog forcing user to check the input values (triggered by clicking on submit)
@@ -242,7 +242,7 @@ ui = shinyUI(dashboardPage(
                          shinyjs::disabled(textInput(inputId = "value_tab", "Wert", ""))
                   ),
                     checkboxInput(inputId = "done_tab", "Beglichen"),
-                    actionButton("update", "Änderung übernehmen", icon = icon("send")), # Was for submitting the change in checkbox input... maybe possible submitting while clicking the checkbox
+                    actionButton("update", "Änderung übernehmen", icon = icon("paper-plane")), # Was for submitting the change in checkbox input... maybe possible submitting while clicking the checkbox
                     actionButton("delete", "Zeile löschen (!!!)", icon = icon("trash"))
                   )
           )
